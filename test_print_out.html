@@ -1,48 +1,8 @@
-<?php
-declare(strict_types=1);
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/includes/constants.php';
-require_once __DIR__ . '/includes/auth.php';
-
-$pdo = db();
-$job_id = (int)($_GET['job'] ?? 0);
-
-if (!$job_id) {
-    die("Invalid Job ID Reference.");
-}
-
-$stmt = $pdo->prepare("
-    SELECT j.title, j.job_code, j.department 
-    FROM jobs j 
-    WHERE j.id = ?
-");
-$stmt->execute([$job_id]);
-$job = $stmt->fetch();
-
-if (!$job) {
-    die("Job not found.");
-}
-
-$stmt = $pdo->prepare("
-    SELECT a.id_no, 
-           COALESCE(u.full_name, CONCAT(a.first_name, ' ', a.last_name)) AS full_name,
-           COALESCE(u.username, a.id_no) AS display_id,
-           COALESCE(u.sub_county, a.sub_county) AS sub_county,
-           COALESCE(u.ward, a.ward) AS ward
-    FROM applications a 
-    LEFT JOIN users u ON a.user_id = u.id
-    WHERE a.job_id = ? AND a.status IN ('Shortlisted', 'Interview Scheduled', 'Interviewed', 'Hired')
-    ORDER BY full_name
-");
-$stmt->execute([$job_id]);
-$shortlisted = $stmt->fetchAll();
-
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Official Shortlist: <?= h($job['title']) ?> PDF Print</title>
+<title>Official Shortlist: Procurement Officer PDF Print</title>
 <style>
     @page { margin: 15mm; size: A4 portrait; }
     body { font-family: 'Times New Roman', Times, serif; color: #000; background: #eaedf0; line-height: 1.4; padding: 20px; }
@@ -70,10 +30,10 @@ $shortlisted = $stmt->fetchAll();
     </div>
 
     <div class="details">
-        <strong>Position / Job Title:</strong> <?= h($job['title']) ?><br>
-        <strong>Job Reference:</strong> <?= h($job['job_code']) ?><br>
-        <strong>Department:</strong> <?= h($job['department']) ?><br>
-        <strong>Total Shortlisted:</strong> <?= count($shortlisted) ?> Candidates
+        <strong>Position / Job Title:</strong> Procurement Officer<br>
+        <strong>Job Reference:</strong> TNC/PO/2026<br>
+        <strong>Department:</strong> Finance &amp; Procurement<br>
+        <strong>Total Shortlisted:</strong> 7 Candidates
     </div>
 
     <table>
@@ -87,26 +47,60 @@ $shortlisted = $stmt->fetchAll();
             </tr>
         </thead>
         <tbody>
-            <?php if (empty($shortlisted)): ?>
-                <tr><td colspan="5" style="text-align:center;">No candidates published yet.</td></tr>
-            <?php else: ?>
-                <?php foreach ($shortlisted as $i => $a): 
-                    $id_display = (strlen((string)($a['display_id'] ?? '')) > 4) ? substr((string)$a['display_id'], 0, -4) . '****' : ($a['display_id'] ?? '—');
-                ?>
-                <tr>
-                    <td><?= $i + 1 ?></td>
-                    <td><strong style="text-transform:uppercase;"><?= h($a['full_name']) ?></strong></td>
-                    <td style="font-family: monospace; font-size: 14px;"><?= h($id_display) ?></td>
-                    <td><?= h($a['sub_county'] ?? '—') ?></td>
-                    <td><?= h($a['ward'] ?? '—') ?></td>
+                                            <tr>
+                    <td>1</td>
+                    <td><strong style="text-transform:uppercase;">Isaac Wabukhe Barasa</strong></td>
+                    <td style="font-family: monospace; font-size: 14px;">3043****</td>
+                    <td>Saboti</td>
+                    <td>Kinyoro</td>
                 </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </tbody>
+                                <tr>
+                    <td>2</td>
+                    <td><strong style="text-transform:uppercase;">Losyel L James</strong></td>
+                    <td style="font-family: monospace; font-size: 14px;">2769****</td>
+                    <td>Kiminini</td>
+                    <td>Kiminini</td>
+                </tr>
+                                <tr>
+                    <td>3</td>
+                    <td><strong style="text-transform:uppercase;">Maiyo J Felicity</strong></td>
+                    <td style="font-family: monospace; font-size: 14px;">2974****</td>
+                    <td>Endebess</td>
+                    <td>Chepchoina</td>
+                </tr>
+                                <tr>
+                    <td>4</td>
+                    <td><strong style="text-transform:uppercase;">Namwetako N Branice</strong></td>
+                    <td style="font-family: monospace; font-size: 14px;">2339****</td>
+                    <td>Cherangany</td>
+                    <td>Makutano</td>
+                </tr>
+                                <tr>
+                    <td>5</td>
+                    <td><strong style="text-transform:uppercase;">Ngeno Kibet Japheth</strong></td>
+                    <td style="font-family: monospace; font-size: 14px;">2865****</td>
+                    <td>Cherangany</td>
+                    <td>Sinyereri</td>
+                </tr>
+                                <tr>
+                    <td>6</td>
+                    <td><strong style="text-transform:uppercase;">Pammelor Machuma Lukorito</strong></td>
+                    <td style="font-family: monospace; font-size: 14px;">—</td>
+                    <td>Saboti</td>
+                    <td>Matisi</td>
+                </tr>
+                                <tr>
+                    <td>7</td>
+                    <td><strong style="text-transform:uppercase;">Simiyu Everlyne Nanjala</strong></td>
+                    <td style="font-family: monospace; font-size: 14px;">2672****</td>
+                    <td>Kwanza</td>
+                    <td>Bidii</td>
+                </tr>
+                                    </tbody>
     </table>
 
             <div class="footer">
-                Generated on <?= date('d F Y, g:i A') ?> — TNC Recruitment Portal<br>
+                Generated on 29 March 2026, 12:24 PM — TNC Recruitment Portal<br>
                 <strong>This is an official document of the County Government of Trans Nzoia.</strong>
             </div>
         </div>
@@ -119,7 +113,7 @@ window.onload = function() {
     // Configure PDF options
     var opt = {
         margin:       10,
-        filename:     'Official_Shortlist_<?= preg_replace('/[^a-zA-Z0-9]+/', '_', $job['job_code']) ?>.pdf',
+        filename:     'Official_Shortlist_TNC_PO_2026.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
