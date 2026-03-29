@@ -9,9 +9,13 @@ $pdo = db();
 $status_filter = $_GET['status'] ?? '';
 $job_filter = $_GET['job_id'] ?? '';
 
-$sql = "SELECT a.id, a.ref_no, a.status, a.submitted_at, u.full_name, u.email, u.phone, j.title AS job_title
+$sql = "SELECT a.id, a.ref_no, a.status, a.submitted_at, 
+               COALESCE(u.full_name, CONCAT(a.first_name, ' ', a.last_name)) AS full_name, 
+               COALESCE(u.email, a.email) AS email, 
+               COALESCE(u.phone, a.phone) AS phone, 
+               j.title AS job_title
         FROM applications a 
-        JOIN users u ON a.user_id = u.id 
+        LEFT JOIN users u ON a.user_id = u.id 
         JOIN jobs j ON a.job_id = j.id
         WHERE 1=1";
 $params = [];
