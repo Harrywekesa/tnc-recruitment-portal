@@ -1,0 +1,33 @@
+Options -Indexes
+DirectoryIndex index.php
+
+# Block direct access to uploads (except through PHP)
+<FilesMatch "\.(php)$">
+  Order Allow,Deny
+  Allow from all
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Block direct access to includes
+  RewriteRule ^includes/ - [F,L]
+
+  # Block PHP execution in uploads/
+  RewriteRule ^uploads/.*\.php$ - [F,L]
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-XSS-Protection "1; mode=block"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Deny access to sensitive files
+<FilesMatch "(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json)$">
+  Order Deny,Allow
+  Deny from all
+</FilesMatch>

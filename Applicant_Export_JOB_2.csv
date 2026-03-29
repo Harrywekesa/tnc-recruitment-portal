@@ -1,0 +1,7 @@
+"Appl ID","Job Title","Full Name","ID Number",Phone,Email,Gender,Sub-County,Ward,"Highest Education",Status,"Submitted At"
+<br />
+<b>Fatal error</b>:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'qualification' in 'field list' in C:\xampp\htdocs\tnc-portal\admin\reports.php:34
+Stack trace:
+#0 C:\xampp\htdocs\tnc-portal\admin\reports.php(34): PDO-&gt;prepare('SELECT a.id, j....')
+#1 {main}
+  thrown in <b>C:\xampp\htdocs\tnc-portal\admin\reports.php</b> on line <b>34</b><br />

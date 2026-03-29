@@ -1,0 +1,14 @@
+Here are the administrative credentials currently active in your MySQL users table:
+
+System Administrator (superadmin role)
+
+Username / Login: superadmin (or admin@transnzoia.go.ke)
+Password: admin123
+HR Officer (hr role)
+
+Username / Login: hr_officer (or hr@transnzoia.go.ke)
+Password: admin123
+Recruitment Officer (admin role)
+
+Username / Login: recruitment (or recruitment@transnzoia.go.ke)
+Password: admin123
