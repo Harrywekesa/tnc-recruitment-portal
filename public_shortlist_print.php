@@ -44,26 +44,25 @@ $shortlisted = $stmt->fetchAll();
 <title>Official Shortlist: <?= h($job['title']) ?> PDF Print</title>
 <style>
     @page { margin: 15mm; size: A4 portrait; }
-    body { font-family: 'Times New Roman', Times, serif; color: #000; background: #fff; line-height: 1.4; padding: 0; margin: 0; }
+    body { font-family: 'Times New Roman', Times, serif; color: #000; background: #eaedf0; line-height: 1.4; padding: 20px; }
+    #wrapper { max-width: 800px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     h1, h2, h3, h4 { margin: 0 0 10px 0; text-align: center; }
     .header { border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; text-align: center; }
-    .header img { width: 100px; height: auto; margin-bottom: 15px; }
     .details { text-align: center; font-size: 14px; margin-bottom: 30px; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13.5px; }
     th, td { border: 1px solid #000; padding: 8px 10px; text-align: left; }
     th { background-color: #f2f2f2; font-weight: bold; text-transform: uppercase; font-size: 12px; }
     .footer { text-align: center; font-size: 12px; margin-top: 50px; padding-top: 15px; border-top: 1px solid #ccc; }
-    @media print {
-        #print-btn { display: none; }
-    }
+    .status-msg { text-align: center; font-family: sans-serif; font-size: 16px; color: #166534; font-weight: 600; padding: 15px; background: #dcfce7; border-radius: 6px; margin-bottom: 20px; }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
-<body onload="window.print()">
-    <div style="text-align: right; padding: 10px;">
-        <button id="print-btn" onclick="window.print()" style="padding: 10px 20px; font-size: 16px; cursor: pointer; background: #166534; color: #fff; border: none; border-radius: 4px;">Click to Save PDF / Print</button>
-    </div>
-
-    <div class="header">
+<body>
+    <div id="wrapper">
+        <div id="status-indicator" class="status-msg">Generating Official PDF Document... Please wait.</div>
+        
+        <div id="pdf-content" style="background:#fff; padding:20px;">
+            <div class="header">
         <h2>COUNTY GOVERNMENT OF TRANS NZOIA</h2>
         <h3>COUNTY PUBLIC SERVICE BOARD</h3>
         <div>Official Shortlisted Candidates Document</div>
@@ -105,9 +104,32 @@ $shortlisted = $stmt->fetchAll();
         </tbody>
     </table>
 
-    <div class="footer">
-        Generated on <?= date('d F Y, g:i A') ?> — TNC Recruitment Portal<br>
-        <strong>This is an official document of the County Government of Trans Nzoia.</strong>
+            <div class="footer">
+                Generated on <?= date('d F Y, g:i A') ?> — TNC Recruitment Portal<br>
+                <strong>This is an official document of the County Government of Trans Nzoia.</strong>
+            </div>
+        </div>
     </div>
+
+<script>
+window.onload = function() {
+    var element = document.getElementById('pdf-content');
+    
+    // Configure PDF options
+    var opt = {
+        margin:       10,
+        filename:     'Official_Shortlist_<?= preg_replace('/[^a-zA-Z0-9]+/', '_', $job['job_code']) ?>.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    // Generate and Download PDF
+    html2pdf().set(opt).from(element).save().then(function() {
+        document.getElementById('status-indicator').innerText = "PDF downloaded successfully! You can now close this tab.";
+        setTimeout(function(){ window.close(); }, 3000);
+    });
+};
+</script>
 </body>
 </html>
