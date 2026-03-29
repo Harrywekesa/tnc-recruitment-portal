@@ -18,14 +18,15 @@ if ($filter_job || !empty($jobs_with_shortlist)) {
     $job_id = $filter_job ?: ($jobs_with_shortlist[0]['id'] ?? 0);
     if ($job_id) {
         $stmt = $pdo->prepare("
-            SELECT a.*, 
+            SELECT a.id_no, 
                    COALESCE(u.full_name, CONCAT(a.first_name, ' ', a.last_name)) AS full_name,
+                   COALESCE(u.username, a.id_no) AS display_id,
                    COALESCE(u.sub_county, a.sub_county) AS sub_county,
                    COALESCE(u.ward, a.ward) AS ward
             FROM applications a 
             LEFT JOIN users u ON a.user_id = u.id
             WHERE a.job_id = ? AND a.status IN ('Shortlisted', 'Interview Scheduled', 'Interviewed', 'Hired')
-            ORDER BY u.full_name, a.last_name
+            ORDER BY full_name
         ");
         $stmt->execute([$job_id]);
         $shortlisted = $stmt->fetchAll();
@@ -64,26 +65,32 @@ require_once __DIR__ . '/includes/partials/header.php';
       </div>
       <?php if (!empty($shortlisted)): ?>
       <div class="card fade-up">
-        <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-          <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--green-900);">Shortlisted Candidates</div>
-          <span class="badge badge-success"><?= count($shortlisted) ?> candidates</span>
+        <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+          <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--green-900);">Official Shortlisted Candidates</div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span class="badge badge-success"><?= count($shortlisted) ?> candidates</span>
+            <a href="public_shortlist_print.php?job=<?= $job_id ?>" target="_blank" class="btn btn-outline-dark btn-sm" style="font-size:12px; padding:6px 14px;">📄 Download PDF Form</a>
+          </div>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>#</th><th>Name</th><th>Gender</th><th>Qualification</th><th>Institution</th><th>Experience</th><th>Sub-County</th><th>Ward</th>
+                <th style="width:5%;">#</th>
+                <th style="width:35%;">Applicant Name</th>
+                <th style="width:20%;">National ID</th>
+                <th style="width:20%;">Sub-County</th>
+                <th style="width:20%;">Ward</th>
               </tr>
             </thead>
             <tbody>
-              <?php foreach ($shortlisted as $i => $a): ?>
+              <?php foreach ($shortlisted as $i => $a): 
+                $id_display = (strlen((string)($a['display_id'] ?? '')) > 4) ? substr((string)$a['display_id'], 0, -4) . '****' : ($a['display_id'] ?? '—');
+              ?>
               <tr>
                 <td class="muted"><?= $i+1 ?></td>
-                <td><strong><?= h($a['full_name']) ?></strong></td>
-                <td class="muted"><?= h($a['gender']) ?></td>
-                <td class="muted"><?= h($a['degree'] ?? '—') ?></td>
-                <td class="muted"><?= h($a['institution'] ?? '—') ?></td>
-                <td class="muted"><?= h($a['experience'] ?? '—') ?></td>
+                <td><strong style="color:var(--text-dark);"><?= h($a['full_name']) ?></strong></td>
+                <td class="muted" style="font-family:var(--font-mono); letter-spacing:0.04em;"><?= h($id_display) ?></td>
                 <td class="muted"><?= h($a['sub_county'] ?? '—') ?></td>
                 <td class="muted"><?= h($a['ward'] ?? '—') ?></td>
               </tr>
