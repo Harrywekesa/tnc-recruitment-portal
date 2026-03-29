@@ -8,7 +8,7 @@ $pdo  = db();
 $jobs_with_shortlist = $pdo->query("
     SELECT DISTINCT j.id, j.job_code, j.title, j.department
     FROM applications a JOIN jobs j ON a.job_id = j.id
-    WHERE a.status = 'Shortlisted'
+    WHERE a.status IN ('Shortlisted', 'Interview Scheduled', 'Interviewed', 'Hired')
     ORDER BY j.id
 ")->fetchAll();
 
@@ -17,7 +17,16 @@ $shortlisted = [];
 if ($filter_job || !empty($jobs_with_shortlist)) {
     $job_id = $filter_job ?: ($jobs_with_shortlist[0]['id'] ?? 0);
     if ($job_id) {
-        $stmt = $pdo->prepare("SELECT * FROM applications WHERE job_id = ? AND status = 'Shortlisted' ORDER BY last_name");
+        $stmt = $pdo->prepare("
+            SELECT a.*, 
+                   COALESCE(u.full_name, CONCAT(a.first_name, ' ', a.last_name)) AS full_name,
+                   COALESCE(u.sub_county, a.sub_county) AS sub_county,
+                   COALESCE(u.ward, a.ward) AS ward
+            FROM applications a 
+            LEFT JOIN users u ON a.user_id = u.id
+            WHERE a.job_id = ? AND a.status IN ('Shortlisted', 'Interview Scheduled', 'Interviewed', 'Hired')
+            ORDER BY u.full_name, a.last_name
+        ");
         $stmt->execute([$job_id]);
         $shortlisted = $stmt->fetchAll();
     }
@@ -70,7 +79,7 @@ require_once __DIR__ . '/includes/partials/header.php';
               <?php foreach ($shortlisted as $i => $a): ?>
               <tr>
                 <td class="muted"><?= $i+1 ?></td>
-                <td><strong><?= h($a['first_name'].' '.$a['last_name']) ?></strong></td>
+                <td><strong><?= h($a['full_name']) ?></strong></td>
                 <td class="muted"><?= h($a['gender']) ?></td>
                 <td class="muted"><?= h($a['degree'] ?? '—') ?></td>
                 <td class="muted"><?= h($a['institution'] ?? '—') ?></td>

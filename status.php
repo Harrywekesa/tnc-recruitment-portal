@@ -14,15 +14,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || (isset($_GET['ref']) && isset($_GET
         $pdo  = db();
         $stmt = $pdo->prepare("
             SELECT a.*, j.title AS job_title, j.department, j.job_code,
-                   u.full_name, u.sub_county, u.ward,
+                   COALESCE(u.full_name, CONCAT(a.first_name, ' ', a.last_name)) AS full_name, 
+                   COALESCE(u.sub_county, a.sub_county) AS sub_county, 
+                   COALESCE(u.ward, a.ward) AS ward,
                    i.interview_date, i.interview_time, i.venue, i.mode AS interview_mode, i.requirements
             FROM applications a
             JOIN jobs j ON a.job_id = j.id
-            JOIN users u ON a.user_id = u.id
+            LEFT JOIN users u ON a.user_id = u.id
             LEFT JOIN interviews i ON i.application_id = a.id
-            WHERE a.ref_no = ? AND u.username = ?
+            WHERE a.ref_no = ? AND (u.username = ? OR a.id_no = ?)
         ");
-        $stmt->execute([$ref, $id_no]);
+        $stmt->execute([$ref, $id_no, $id_no]);
         $result = $stmt->fetch();
         if (!$result) $error = 'No application found with those details. Check your reference number and ID number.';
     }
