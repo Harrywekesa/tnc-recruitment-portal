@@ -14,11 +14,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || (isset($_GET['ref']) && isset($_GET
         $pdo  = db();
         $stmt = $pdo->prepare("
             SELECT a.*, j.title AS job_title, j.department, j.job_code,
+                   u.full_name, u.sub_county, u.ward,
                    i.interview_date, i.interview_time, i.venue, i.mode AS interview_mode, i.requirements
             FROM applications a
             JOIN jobs j ON a.job_id = j.id
+            JOIN users u ON a.user_id = u.id
             LEFT JOIN interviews i ON i.application_id = a.id
-            WHERE a.ref_no = ? AND a.id_no = ?
+            WHERE a.ref_no = ? AND u.username = ?
         ");
         $stmt->execute([$ref, $id_no]);
         $result = $stmt->fetch();
@@ -77,7 +79,7 @@ require_once __DIR__ . '/includes/partials/header.php';
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:13.5px;">
         <div><span style="color:var(--text-light);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:3px;">Reference No.</span><strong style="font-family:var(--font-mono)"><?= h($result['ref_no']) ?></strong></div>
         <div><span style="color:var(--text-light);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:3px;">Submitted</span><?= date('d M Y', strtotime($result['submitted_at'])) ?></div>
-        <div><span style="color:var(--text-light);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:3px;">Applicant</span><?= h($result['first_name'] . ' ' . $result['last_name']) ?></div>
+        <div><span style="color:var(--text-light);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:3px;">Applicant</span><?= h($result['full_name']) ?></div>
         <div><span style="color:var(--text-light);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:3px;">Sub-County</span><?= h($result['sub_county'] . ' / ' . $result['ward']) ?></div>
       </div>
       <?php if ($result['interview_date']): ?>
