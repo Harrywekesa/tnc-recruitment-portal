@@ -32,7 +32,7 @@ $root = $root ?? '';
 <div class="topbar">
   <div class="container">
     <div class="topbar-left">
-      <span>County Government of Trans Nzoia — Official Recruitment Portal</span>
+      <span>Trans Nzoia County Public Service Board — Official Recruitment Portal</span>
       <div class="topbar-div"></div>
       <a href="tel:+25405320604">+254 (053) 20604</a>
     </div>
@@ -58,9 +58,9 @@ $root = $root ?? '';
 <nav class="navbar">
   <div class="container">
     <a href="<?= $root ?>index.php" class="nav-brand">
-      <div class="nav-crest">TN</div>
+      <img src="<?= $root ?>assets/img/logo.png" style="width:48px;height:auto;border-radius:4px;" alt="TNC Logo">
       <div class="nav-brand-text">
-        <div class="nav-brand-title">Trans Nzoia County</div>
+        <div class="nav-brand-title">Trans Nzoia County Public Service Board</div>
         <div class="nav-brand-sub">Recruitment Portal</div>
       </div>
     </a>
